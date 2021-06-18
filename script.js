@@ -24,6 +24,7 @@ let copilotStatus;
 let fuelStatus;
 let cargoStatus;
 let launchStatush2;
+let missionTarget;
 
 const assignElements = () => {
     form = document.getElementById('launchForm');
@@ -37,6 +38,7 @@ const assignElements = () => {
     fuelStatus = document.getElementById('fuelStatus');
     cargoStatus = document.getElementById('cargoStatus');
     launchStatush2 = document.getElementById('launchStatus');
+    missionTarget = document.getElementById('missionTarget');
 };
 
 const launchCheck = () => {
@@ -61,10 +63,10 @@ const launchCheck = () => {
         launchStatush2.style.color = 'green';
         launchStatush2.innerHTML = 'Shuttle is ready for launch';
     }
-}
+};
 
 const validateInputs = (inputArr) => {
-    // check for null
+    // loop through and check for blank inputs
     for (let i = 0; i < inputArr.length; i++) {
         if (!inputArr[i].value) {
             alert('All fields are required');
@@ -81,7 +83,36 @@ const validateInputs = (inputArr) => {
         pilotStatus.innerHTML = `Pilot ${pilotName.value} Ready!`;
         copilotStatus.innerHTML = `Copilot ${copilotName.value} Ready!`;
     }
-}
+};
+
+// returns array of planet objects
+// const fetchPlanets = () => {
+//     fetch('https://handlers.education.launchcode.org/static/planets.json').then((planets) => {
+//         planets.json().then((json) => {
+//             return json;
+//         });
+//     });
+// };
+
+const choosePlanet = (index) => {
+    let planets = fetchPlanets();
+    return planets[index];
+};
+
+const fillInTargetHTML = (planetData) => {
+    missionTarget.innerHTML = 
+    `
+        <h2>Mission Destination</h2>
+        <ol>
+            <li>Name: ${planetData.name}</li>
+            <li>Diameter: ${planetData.diameter}</li>
+            <li>Star: ${planetData.star}</li>
+            <li>Distance from Earth: ${planetData.distance}</li>
+            <li>Number of Moons: ${planetData.moons}</li>
+        </ol>
+        <img src="${planetData.image}">
+    `
+};
 
 
 // on load assigning event listeners
@@ -90,11 +121,22 @@ window.addEventListener('load', () => {
     assignElements();
 
     let formInputArr = [pilotName, copilotName, fuelLevel, cargoMass];
+    
+    fetch('https://handlers.education.launchcode.org/static/planets.json').then((planetData) => {
+        planetData.json().then((json) => {
+            fillInTargetHTML(json[4]);
+        });
+    });
+
+    
+
+    
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        // loop through input values to check if any are blank
+
         validateInputs(formInputArr);
+
         launchCheck();
     });
 
