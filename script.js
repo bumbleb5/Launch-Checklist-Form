@@ -42,22 +42,31 @@ const assignElements = () => {
 };
 
 const launchCheck = () => {
+
     if (Number(fuelLevel.value) < 10000) {
         faultyItems.style.visibility = "visible";
         fuelStatus.innerHTML = 'Not enough fuel';
         launchStatush2.style.color = 'red';
         launchStatush2.innerHTML = 'Shuttle not ready for launch';
+
         if (Number(cargoMass.value) > 10000) {
             cargoStatus.innerHTML = 'Too much cargo for takeoff';
-        } 
+        } else {
+            cargoStatus.innerHTML = 'Cargo mass low enough for launch';
+        }
+
     } else if (Number(cargoMass.value) > 10000) {
         faultyItems.style.visibility = "visible";
         launchStatush2.style.color = 'red';
         launchStatush2.innerHTML = 'Shuttle not ready for launch';
         cargoStatus.innerHTML = 'Too much cargo for takeoff';
+
         if (Number(fuelLevel.value) < 10000) {
             fuelStatus.innerHTML = 'Not enough fuel';
+        } else {
+            fuelStatus.innerHTML = 'Fuel level high enough for launch';
         }
+
     } else {
         faultyItems.style.visibility = "hidden";
         launchStatush2.style.color = 'green';
@@ -66,37 +75,35 @@ const launchCheck = () => {
 };
 
 const validateInputs = (inputArr) => {
+
     // loop through and check for blank inputs
     for (let i = 0; i < inputArr.length; i++) {
         if (!inputArr[i].value) {
             alert('All fields are required');
-            break;
+            return false;
         }
     }
-    // validate types
-    if (typeof pilotName.value !== 'string' || typeof copilotName.value !== 'string') {
+
+    // validate types 
+    // if the expected string can be converted to number
+    if (!isNaN(pilotName.value) || !isNaN(copilotName.value)) {
         alert('Names must be strings');
-    // isNaN(fuelLevel) should return false
+        return false;
+    // if the expected numbers are not a number
     } else if (isNaN(fuelLevel.value) || isNaN(cargoMass.value)) {
         alert('Fuel level and cargo mass must be numbers');
+        return false;
     } else {
         pilotStatus.innerHTML = `Pilot ${pilotName.value} Ready!`;
         copilotStatus.innerHTML = `Copilot ${copilotName.value} Ready!`;
+        return true;
     }
 };
 
-// returns array of planet objects
-// const fetchPlanets = () => {
-//     fetch('https://handlers.education.launchcode.org/static/planets.json').then((planets) => {
-//         planets.json().then((json) => {
-//             return json;
-//         });
-//     });
-// };
-
-const choosePlanet = (index) => {
-    let planets = fetchPlanets();
-    return planets[index];
+// TODO chooseRandomPlanet
+const chooseRandomPlanet = (planetArr) => {
+    let index = Math.floor(Math.random() * planetArr.length);
+    return planetArr[index];
 };
 
 const fillInTargetHTML = (planetData) => {
@@ -124,20 +131,17 @@ window.addEventListener('load', () => {
     
     fetch('https://handlers.education.launchcode.org/static/planets.json').then((planetData) => {
         planetData.json().then((json) => {
-            fillInTargetHTML(json[4]);
+            fillInTargetHTML(chooseRandomPlanet(json));
         });
     });
-
-    
-
-    
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        validateInputs(formInputArr);
+        if (validateInputs(formInputArr)) {
+            launchCheck();
+        }
 
-        launchCheck();
     });
 
 });
